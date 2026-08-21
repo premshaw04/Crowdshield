@@ -1,0 +1,95 @@
+﻿
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\parse_eslint.js
+  1:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\maps\VenueMap.tsx
+  186:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\maps\VenueMap.tsx:186:5
+  184 |
+  185 |   useEffect(() => {
+> 186 |     setMounted(true);
+      |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  187 |   }, []);
+  188 |
+  189 |   if (!mounted) {  react-hooks/set-state-in-effect
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\organisms\Navbar\Navbar.tsx
+  19:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\organisms\Navbar\Navbar.tsx:19:5
+  17 |
+  18 |   useEffect(() => {
+> 19 |     setIsDemoMode(apiConfig.IS_DEMO_MODE);
+     |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |   }, []);
+  21 |
+  22 |   useEffect(() => {  react-hooks/set-state-in-effect
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\widgets\CrowdHeatmapView.tsx
+  24:32  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\components\widgets\CrowdHeatmapView.tsx:24:32
+  22 |   // Mark mode as loaded when selected
+  23 |   React.useEffect(() => {
+> 24 |     if (mapMode === 'OUTDOOR') setHasLoadedOutdoor(true);
+     |                                ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  25 |     if (mapMode === 'INDOOR') setHasLoadedIndoor(true);
+  26 |   }, [mapMode]);
+  27 |  react-hooks/set-state-in-effect
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\hooks\useApiState.ts
+  84:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\hooks\useApiState.ts:84:7
+  82 |   useEffect(() => {
+  83 |     if (options.executeOnMount) {
+> 84 |       execute(...([] as unknown as P)).catch(() => {});
+     |       ^^^^^^^ Avoid calling setState() directly within an effect
+  85 |     }
+  86 |   }, [options.executeOnMount, execute]);
+  87 |  react-hooks/set-state-in-effect
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\lib\services\auth\auth.base.ts
+  65:31  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  65:45  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\lib\services\cameras\cameras.demo.ts
+   5:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  20:67  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:64  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  32:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\lib\services\monitoring\monitoring.api.ts
+  21:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\TUF GAMING\OneDrive\Desktop\CroudSheild\frontend\src\lib\websocket\client.ts
+  151:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  169:59  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 14 problems (14 errors, 0 warnings)
+

@@ -1,0 +1,12 @@
+node_modules/
+.next/
+dist/
+build/
+venv/
+.env
+.pytest_cache/
+__pycache__/
+*.pyc
+.DS_Store
+backend/alembic.ini
+backend/crowdshield.db
