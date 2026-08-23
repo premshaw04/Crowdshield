@@ -9,7 +9,7 @@ from app.repositories.recommendation_repository import recommendation_repository
 router = APIRouter()
 
 @router.post("/{recommendation_id}/approve", response_model=RecommendationResponse)
-def approve_recommendation(
+async def approve_recommendation(
     recommendation_id: str,
     db: Session = Depends(dependencies.get_db),
     current_user: User = Depends(dependencies.get_current_user)
@@ -29,6 +29,36 @@ def approve_recommendation(
     # In a full app we'd verify the event's created_by
     
     rec = recommendation_repository.approve(db, db_obj=rec, user_id=current_user.id)
+    
+    # Save alert to DB
+    from app.models.alert import Alert, AlertType, AlertCategory
+    new_alert = Alert(
+        zone_id=rec.zone_id,
+        title="Safety Recommendation Approved",
+        description=rec.reason,
+        type=AlertType.WARNING,
+        category=AlertCategory.SAFETY
+    )
+    db.add(new_alert)
+    db.commit()
+    db.refresh(new_alert)
+
+    # Broadcast alert to all clients in the affected zone
+    from app.websockets.manager import manager
+    
+    alert_payload = {
+        "type": "new_alert",
+        "alert": {
+            "id": new_alert.id,
+            "title": new_alert.title,
+            "description": new_alert.description,
+            "time": new_alert.created_at.strftime("%I:%M %p"),
+            "type": new_alert.type.value, 
+            "category": new_alert.category.value
+        }
+    }
+    
+    await manager.broadcast_to_zone(str(rec.zone_id), alert_payload)
     return rec
 
 @router.post("/{recommendation_id}/reject", response_model=RecommendationResponse)

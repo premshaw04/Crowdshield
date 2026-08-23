@@ -134,7 +134,7 @@ class ApiClient {
     return this.request<T>(endpoint, {
       ...options,
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data ? (data instanceof URLSearchParams ? data.toString() : JSON.stringify(data)) : undefined,
     });
   }
 

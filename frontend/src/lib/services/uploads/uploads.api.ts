@@ -7,7 +7,7 @@ export class UploadsApi implements IUploadsService {
     formData.append('file', file);
 
     // Call the backend API (multipart/form-data)
-    const response = await apiClient.upload<{ data: UploadResult }>('/api/v1/uploads', formData);
+    const response = await apiClient.upload<{ data: UploadResult }>('/uploads', formData);
     return response.data;
   }
 }

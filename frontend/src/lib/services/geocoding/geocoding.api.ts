@@ -6,7 +6,7 @@ export class GeocodingApi implements IGeocodingService {
     if (!query || query.trim() === '') {
       return [];
     }
-    const response = await apiClient.get<GeocodingResult[]>('/api/v1/geocoding/search', {
+    const response = await apiClient.get<GeocodingResult[]>('/geocoding/search', {
       params: { q: query }
     });
     return response;

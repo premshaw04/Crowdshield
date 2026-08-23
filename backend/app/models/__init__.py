@@ -12,3 +12,5 @@ from app.models.safe_route import SafeRoute
 from app.models.recommendation import Recommendation
 from app.models.audit_log import AuditLog
 from app.models.intervention_result import InterventionResult
+from app.models.alert import Alert
+from app.models.incident import Incident

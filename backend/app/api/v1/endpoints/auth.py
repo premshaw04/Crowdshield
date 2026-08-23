@@ -7,12 +7,34 @@ from sqlalchemy.orm import Session
 from app.api import dependencies
 from app.core import security
 from app.core.config import settings
-from app.models.user import User
+from app.models.user import User, Role
 from app.repositories.user_repository import UserRepository
 from app.schemas.token import Token
-from app.schemas.user import UserResponse
+from app.schemas.user import UserResponse, UserCreate
 
 router = APIRouter()
+
+@router.post("/register", response_model=UserResponse)
+def register_user(
+    user_in: UserCreate,
+    db: Session = Depends(dependencies.get_db)
+) -> Any:
+    user_repo = UserRepository(db)
+    if user_repo.get_by_email(email=user_in.email):
+        raise HTTPException(
+            status_code=400,
+            detail="The user with this email already exists in the system.",
+        )
+    
+    # By default, a new user registered via the API gets the role they requested or AUTHORITY
+    user = User(
+        name=user_in.name,
+        email=user_in.email,
+        password_hash=security.get_password_hash(user_in.password),
+        role=user_in.role or Role.AUTHORITY
+    )
+    user = user_repo.create(user)
+    return user
 
 @router.post("/login", response_model=Token)
 def login_access_token(
@@ -34,6 +56,21 @@ def login_access_token(
         )
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+
+    # Enforce role-based access to different client apps using OAuth scopes
+    requested_scopes = form_data.scopes
+    if "authority" in requested_scopes:
+        if user.role not in [Role.SUPER_ADMIN, Role.AUTHORITY, Role.OPERATOR, Role.SECURITY_SUPERVISOR]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, 
+                detail="Access denied. This account does not have Authority privileges."
+            )
+    elif "citizen" in requested_scopes:
+        if user.role != Role.CITIZEN:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, 
+                detail="Access denied. Authority accounts cannot log into the Citizen app."
+            )
         
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     

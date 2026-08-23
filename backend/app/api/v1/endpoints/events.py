@@ -44,13 +44,30 @@ def create_event(
 
 @router.get("", response_model=List[EventResponse])
 def read_events(
+    is_demo: bool = False,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(dependencies.get_db),
     current_user: User = Depends(dependencies.get_current_user)
 ) -> Any:
-    repo = EventRepository(db)
-    events = repo.get_multi(skip=skip, limit=limit)
+    from app.models.event import Event
+    
+    # Account Isolation: Only show events created by the current user
+    query = db.query(Event).filter(Event.created_by == current_user.id)
+    events = query.order_by(Event.created_at.desc()).offset(skip).limit(limit).all()
+    
+    # Demo Mode Filtering
+    DEMO_EVENT_NAMES = [
+        "Phoenix Mall Mega Sale", 
+        "Weekend Concert Series", 
+        "City Marathon 2026", 
+        "Tech Innovators Expo", 
+        "Subway Station Overhaul"
+    ]
+    
+    if not is_demo:
+        events = [e for e in events if e.name not in DEMO_EVENT_NAMES]
+        
     return events
 
 @router.get("/{event_id}", response_model=EventResponse)

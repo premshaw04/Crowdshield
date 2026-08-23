@@ -50,7 +50,7 @@ def delete_route(
     return None
 
 @router.post("/{route_id}/approve", response_model=SafeRouteResponse)
-def approve_route(
+async def approve_route(
     route_id: str,
     db: Session = Depends(dependencies.get_db),
     current_user: User = Depends(dependencies.get_current_user)
@@ -67,4 +67,34 @@ def approve_route(
         raise HTTPException(status_code=403, detail="Only an Authority or Super Admin can approve safe routes")
         
     route = safe_route_repository.approve(db, db_obj=route, user_id=current_user.id)
+    
+    # Save alert to DB
+    from app.models.alert import Alert, AlertType, AlertCategory
+    new_alert = Alert(
+        zone_id=route.source_zone_id,
+        title="New Safe Route Available",
+        description=f"Safe route '{route.name}' has been approved.",
+        type=AlertType.SUCCESS,
+        category=AlertCategory.SAFETY
+    )
+    db.add(new_alert)
+    db.commit()
+    db.refresh(new_alert)
+
+    # Broadcast alert to all clients in the affected zone
+    from app.websockets.manager import manager
+    
+    alert_payload = {
+        "type": "new_alert",
+        "alert": {
+            "id": new_alert.id,
+            "title": new_alert.title,
+            "description": new_alert.description,
+            "time": new_alert.created_at.strftime("%I:%M %p"),
+            "type": new_alert.type.value, 
+            "category": new_alert.category.value
+        }
+    }
+    
+    await manager.broadcast_to_zone(str(route.source_zone_id), alert_payload)
     return route

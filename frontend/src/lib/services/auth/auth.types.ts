@@ -26,6 +26,7 @@ export interface IAuthService {
   readonly currentUser: User | null;
   getToken(): string | null;
   login(credentials: AuthCredentials): Promise<LoginResponse>;
+  register(data: any): Promise<any>;
   logout(): Promise<void>;
   refresh(): Promise<void>;
   getCurrentUser(): Promise<User>;

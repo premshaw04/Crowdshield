@@ -6,8 +6,7 @@ export const apiConfig = {
       const stored = localStorage.getItem('crowdshield_demo_mode');
       if (stored !== null) return stored === 'true';
     }
-    // Default to true if undefined, ensuring the frontend works out-of-the-box without a backend
-    return process.env.NEXT_PUBLIC_IS_DEMO_MODE !== 'false';
+    return process.env.NEXT_PUBLIC_IS_DEMO_MODE === 'true';
   },
   setDemoMode(isDemo: boolean) {
     if (typeof window !== 'undefined') {

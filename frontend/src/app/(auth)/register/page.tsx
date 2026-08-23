@@ -4,10 +4,12 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2, Lock, Mail, User, Shield, ArrowRight } from 'lucide-react';
+import { authService } from '@/lib/services/auth/auth.service';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const [formData, setFormData] = useState({
     name: '',
     agency: '',
@@ -22,13 +24,25 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMsg("Passwords do not match");
+      return;
+    }
     
-    // Simulate API call for registration
-    setTimeout(() => {
-      setIsLoading(false);
+    setIsLoading(true);
+    setErrorMsg('');
+    
+    try {
+      await authService.register({ 
+        name: formData.name, 
+        email: formData.email, 
+        password: formData.password 
+      });
       router.push('/dashboard');
-    }, 2000);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Registration failed');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,6 +53,11 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleRegister} className="space-y-4">
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
+            {errorMsg}
+          </div>
+        )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">

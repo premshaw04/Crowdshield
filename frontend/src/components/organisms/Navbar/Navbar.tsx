@@ -5,8 +5,11 @@ import Link from 'next/link';
 import { Search, Bell, AlertTriangle, Clock, LogIn, MonitorPlay } from 'lucide-react';
 import { useEventContext } from '@/lib/context/EventContext';
 import { apiConfig } from '@/lib/api/config';
+import { authService } from '@/lib/services/auth/auth.service';
+import { User } from '@/lib/services/auth/auth.types';
 
 export const Navbar = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [time, setTime] = useState('11:42:28 AM');
   const [date, setDate] = useState('24 May 2026, Saturday');
   const [countdown, setCountdown] = useState(392); // 06:32 in seconds
@@ -18,6 +21,17 @@ export const Navbar = () => {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDemoMode(apiConfig.IS_DEMO_MODE);
+    
+    // Check local session on mount
+    const currentUser = authService.currentUser;
+    if (currentUser) {
+      setUser(currentUser);
+    } else {
+      // Try to get from API if token exists
+      authService.getCurrentUser()
+        .then(u => setUser(u))
+        .catch(() => setUser(null));
+    }
   }, []);
 
   useEffect(() => {
@@ -154,20 +168,50 @@ export const Navbar = () => {
           </span>
         </button>
 
-        {/* Auth / Login */}
-        <Link href="/login" className="flex items-center gap-2.5 pl-4 border-l border-[#1f2a3c] cursor-pointer group hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-full bg-[#141a27] border border-[#212b3e] flex items-center justify-center text-slate-400 group-hover:text-orange-400 group-hover:border-orange-500/50 transition-all shadow-sm">
-            <LogIn size={15} className="mr-0.5" />
+        {/* Auth / Login / Profile */}
+        {user ? (
+          <div className="flex items-center gap-4 pl-4 border-l border-[#1f2a3c]">
+            <div className="flex items-center gap-2.5 cursor-pointer group hover:opacity-80 transition-opacity">
+              <div className="w-8 h-8 rounded-full bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-orange-400 font-bold uppercase shadow-sm">
+                {user.name.charAt(0)}
+              </div>
+              <div className="hidden sm:flex flex-col text-left">
+                <span className="text-xs font-bold text-slate-100 group-hover:text-white transition-colors">
+                  {user.name}
+                </span>
+                <span className="text-[10px] text-slate-400 leading-none">
+                  {user.role}
+                </span>
+              </div>
+            </div>
+            
+            <button 
+              onClick={async () => {
+                await authService.logout();
+                setUser(null);
+                window.location.href = '/login';
+              }}
+              className="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all shadow-sm ml-2"
+              title="Logout"
+            >
+              <LogIn size={14} className="rotate-180" />
+            </button>
           </div>
-          <div className="hidden sm:flex flex-col text-left">
-            <span className="text-xs font-bold text-slate-100 group-hover:text-white transition-colors">
-              Sign In
-            </span>
-            <span className="text-[10px] text-slate-400 leading-none">
-              Authority Access
-            </span>
-          </div>
-        </Link>
+        ) : (
+          <Link href="/login" className="flex items-center gap-2.5 pl-4 border-l border-[#1f2a3c] cursor-pointer group hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-full bg-[#141a27] border border-[#212b3e] flex items-center justify-center text-slate-400 group-hover:text-orange-400 group-hover:border-orange-500/50 transition-all shadow-sm">
+              <LogIn size={15} className="mr-0.5" />
+            </div>
+            <div className="hidden sm:flex flex-col text-left">
+              <span className="text-xs font-bold text-slate-100 group-hover:text-white transition-colors">
+                Sign In
+              </span>
+              <span className="text-[10px] text-slate-400 leading-none">
+                Authority Access
+              </span>
+            </div>
+          </Link>
+        )}
       </div>
     </header>
   );

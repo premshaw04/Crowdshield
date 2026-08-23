@@ -1,9 +1,11 @@
+import { apiConfig } from '../../api/config';
 import { apiClient } from '../../api/client';
 import { IAlertsService, Alert } from './alerts.types';
 
 export class AlertsApi implements IAlertsService {
   async getAlerts(): Promise<Alert[]> {
-    return apiClient.get<Alert[]>('/alerts');
+    const isDemo = apiConfig.IS_DEMO_MODE;
+    return apiClient.get<Alert[]>(`/alerts?is_demo=${isDemo}`);
   }
 
   async getEventAlerts(eventId: string): Promise<Alert[]> {

@@ -37,6 +37,7 @@ def create_venue(
 
 @router.get("", response_model=List[VenueResponse])
 def read_venues(
+    is_demo: bool = False,
     skip: int = 0,
     limit: int = 100,
     db: Session = Depends(dependencies.get_db),
@@ -44,6 +45,12 @@ def read_venues(
 ) -> Any:
     repo = VenueRepository(db)
     venues = repo.get_multi(skip=skip, limit=limit)
+    
+    if not is_demo:
+        demo_user = db.query(User).filter(User.email == settings.DEMO_ADMIN_EMAIL).first()
+        if demo_user:
+            venues = [v for v in venues if v.created_by != demo_user.id]
+            
     return venues
 
 @router.get("/{venue_id}", response_model=VenueResponse)

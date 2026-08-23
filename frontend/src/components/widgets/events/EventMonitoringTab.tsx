@@ -5,7 +5,7 @@ import { Event as CrowdEvent, EventCamera } from '@/types/event';
 import { Venue } from '@/types/venue';
 import { Maximize2, Radio, Camera as CameraIcon, LayoutGrid, Info, Loader2 } from 'lucide-react';
 import { CrowdHeatmapView } from '@/components/widgets/CrowdHeatmapView';
-import { venuesDemo } from '@/lib/services/venues/venues.demo'; // Using demo service for now, should switch to actual API if implemented
+import { venuesApi as venuesService } from '@/lib/services';
 
 interface EventMonitoringTabProps {
   event: CrowdEvent;
@@ -19,7 +19,7 @@ export const EventMonitoringTab: React.FC<EventMonitoringTabProps> = ({ event })
     const fetchVenue = async () => {
       try {
         if (event.venueId) {
-          const v = await venuesDemo.getVenueById(event.venueId);
+          const v = await venuesService.getVenueById(event.venueId);
           setVenue(v);
         }
       } catch (err) {

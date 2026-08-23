@@ -26,7 +26,10 @@ def seed_db():
             db.commit()
             print("Demo user created successfully.")
         else:
-            print(f"Demo user {settings.DEMO_ADMIN_EMAIL} already exists.")
+            print(f"Demo user {settings.DEMO_ADMIN_EMAIL} already exists. Updating password...")
+            user.password_hash = get_password_hash(settings.DEMO_ADMIN_PASSWORD)
+            db.commit()
+            print("Demo user password updated successfully.")
     except Exception as e:
         print(f"Error seeding database: {e}")
     finally:

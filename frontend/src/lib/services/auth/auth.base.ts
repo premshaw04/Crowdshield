@@ -64,6 +64,7 @@ export abstract class AuthBase implements IAuthService {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abstract login(credentials: any): Promise<any>;
+  abstract register(data: any): Promise<any>;
   abstract logout(): Promise<void>;
   abstract refresh(): Promise<void>;
   abstract getCurrentUser(): Promise<User>;

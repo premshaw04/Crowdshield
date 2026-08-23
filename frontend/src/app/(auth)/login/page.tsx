@@ -4,22 +4,27 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Loader2, Lock, Mail, ArrowRight } from 'lucide-react';
+import { authService } from '@/lib/services/auth/auth.service';
 
 export default function LoginPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMsg('');
     
-    // Simulate API call for login
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await authService.login({ email, password });
       router.push('/dashboard');
-    }, 1500);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Login failed');
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -30,6 +35,11 @@ export default function LoginPage() {
       </div>
 
       <form onSubmit={handleLogin} className="space-y-5">
+        {errorMsg && (
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
+            {errorMsg}
+          </div>
+        )}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider">Agency Email / ID</label>
           <div className="relative group">

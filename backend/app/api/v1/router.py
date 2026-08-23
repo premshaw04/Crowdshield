@@ -26,7 +26,7 @@ def db_check(db: Session = Depends(get_db)):
         logger.error(f"Database connection failed: {str(e)}")
         return {"status": "error", "message": "Database connection failed"}
 
-from app.api.v1.endpoints import auth, venues, zones, gates, events, videos, routes, recommendations
+from app.api.v1.endpoints import auth, venues, zones, gates, events, videos, routes, recommendations, websockets, alerts, incidents
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 api_router.include_router(venues.router, prefix="/venues", tags=["venues"])
 api_router.include_router(zones.router, prefix="/zones", tags=["zones"])
@@ -35,3 +35,6 @@ api_router.include_router(events.router, prefix="/events", tags=["events"])
 api_router.include_router(videos.router, prefix="/videos", tags=["videos"])
 api_router.include_router(routes.router, prefix="/routes", tags=["routes"])
 api_router.include_router(recommendations.router, prefix="/recommendations", tags=["recommendations"])
+api_router.include_router(websockets.router, prefix="/ws", tags=["websockets"])
+api_router.include_router(alerts.router, prefix="/alerts", tags=["alerts"])
+api_router.include_router(incidents.router, prefix="/incidents", tags=["incidents"])

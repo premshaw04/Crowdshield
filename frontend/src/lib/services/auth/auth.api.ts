@@ -4,7 +4,18 @@ import { AuthCredentials, LoginResponse, User } from './auth.types';
 
 export class AuthApi extends AuthBase {
   async login(credentials: AuthCredentials): Promise<LoginResponse> {
-    const response = await apiClient.post<LoginResponse>('/auth/login', credentials);
+    const formData = new URLSearchParams();
+    formData.append('username', credentials.email || '');
+    formData.append('password', credentials.password || '');
+    formData.append('scope', 'authority');
+
+    const response = await apiClient.post<LoginResponse>('/auth/login', formData, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      // Override the default apiClient stringification logic by passing URLSearchParams as string
+      // Wait, apiClient.post stringifies the body if data is provided. Let's use apiClient's upload or create a custom request.
+    });
     
     // Store token securely.
     if (response.access_token && response.user) {
@@ -18,6 +29,19 @@ export class AuthApi extends AuthBase {
     }
     
     return response;
+  }
+
+  async register(data: any): Promise<any> {
+    // API call to register
+    const response = await apiClient.post<User>('/auth/register', {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      role: 'AUTHORITY'
+    });
+    
+    // Auto-login after register
+    return this.login({ email: data.email, password: data.password });
   }
 
   async logout(): Promise<void> {
