@@ -3,7 +3,12 @@ import { ICamerasService } from './cameras.types';
 
 export class CamerasApi implements ICamerasService {
   async getCameras(): Promise<unknown[]> {
-    return apiClient.get('/cameras');
+    try {
+      return await apiClient.get('/cameras');
+    } catch (error) {
+      console.warn("Failed to fetch cameras, returning empty array", error);
+      return [];
+    }
   }
 
   async getCamera(id: string): Promise<unknown | null> {
