@@ -39,7 +39,9 @@ def seed_full_demo():
         if not zone:
             zone = Zone(
                 id=str(uuid.uuid4()), venue_id=venue.id, name="Main Concourse (Demo)",
-                capacity=1000, area=5000.0, warning_density=0.5, high_density=0.7, critical_density=0.9
+                capacity=1000, area=5000.0, 
+                boundary=[{"x": 0, "y": 0}, {"x": 10, "y": 0}, {"x": 10, "y": 10}, {"x": 0, "y": 10}],
+                warning_density=0.5, high_density=0.7, critical_density=0.9
             )
             db.add(zone)
             db.flush()

@@ -524,3 +524,167 @@ def get_event_interventions(
     from app.repositories.intervention_result_repository import intervention_result_repository
     results = intervention_result_repository.get_by_event(db, event_id)
     return results
+
+@router.get("/{event_id}/audit-logs")
+def get_event_audit_logs(
+    event_id: str,
+    db: Session = Depends(dependencies.get_db),
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Returns audit logs for the event.
+    """
+    repo = EventRepository(db)
+    event = repo.get(id=event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+        
+    if event.created_by != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this event's audit logs")
+        
+    from app.models.audit_log import AuditLog
+    logs = db.query(AuditLog).filter(AuditLog.event_id == event_id).order_by(AuditLog.created_at.desc()).all()
+    
+    # Map to AuditLogResponse
+    response = []
+    for log in logs:
+        actor = "System"
+        role = "System"
+        if log.user:
+            actor = f"{log.user.first_name} {log.user.last_name}" if (log.user.first_name and log.user.last_name) else log.user.email
+            role = log.user.role.value if hasattr(log.user.role, 'value') else str(log.user.role)
+            
+        result = "SUCCESS"
+        if log.details and isinstance(log.details, dict):
+            result = log.details.get("result", "SUCCESS")
+            
+        response.append({
+            "id": log.id,
+            "eventId": log.event_id,
+            "timestamp": log.created_at,
+            "actor": actor,
+            "role": role,
+            "action": log.action,
+            "target": log.target_id or "N/A",
+            "result": result
+        })
+        
+    return response
+
+@router.post("/{event_id}/audit-logs", status_code=status.HTTP_201_CREATED)
+def create_event_audit_log(
+    event_id: str,
+    payload: dict,
+    db: Session = Depends(dependencies.get_db),
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Create an audit log for an event action.
+    """
+    repo = EventRepository(db)
+    event = repo.get(id=event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+        
+    from app.models.audit_log import AuditLog
+    
+    log = AuditLog(
+        user_id=current_user.id,
+        event_id=event_id,
+        action=payload.get("action", "UNKNOWN_ACTION"),
+        target_id=payload.get("target"),
+        details={"result": payload.get("result", "SUCCESS")}
+    )
+    
+    db.add(log)
+    db.commit()
+    return {"status": "success"}
+@router.get("/{event_id}/metrics", response_model=None)
+def get_event_metrics_summary(
+    event_id: str,
+    db: Session = Depends(dependencies.get_db),
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Returns aggregate crowd metrics for the event.
+    """
+    repo = EventRepository(db)
+    event = repo.get(id=event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+        
+    latest_metrics = crowd_metric_repository.get_latest_metrics_for_event(db, event_id)
+    if not latest_metrics:
+        return {
+            "currentDensity": 0.0,
+            "currentSpeed": 0.0,
+            "currentOccupancyPercent": 0.0,
+            "entryRate": 0.0
+        }
+        
+    # Average across zones
+    avg_density = sum(m.density for m in latest_metrics) / len(latest_metrics)
+    avg_speed = sum(m.average_speed for m in latest_metrics) / len(latest_metrics)
+    avg_occ = sum(m.occupancy_percentage for m in latest_metrics) / len(latest_metrics)
+    total_entry = sum(m.entry_rate for m in latest_metrics)
+    
+    return {
+        "currentDensity": avg_density,
+        "currentSpeed": avg_speed,
+        "currentOccupancyPercent": avg_occ,
+        "entryRate": total_entry
+    }
+
+@router.get("/{event_id}/predictions", response_model=None)
+def get_event_predictions(
+    event_id: str,
+    db: Session = Depends(dependencies.get_db),
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Returns AI predictions for the event.
+    """
+    repo = EventRepository(db)
+    event = repo.get(id=event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+        
+    from app.models.prediction import Prediction
+    preds = db.query(Prediction).filter(Prediction.event_id == event_id).order_by(Prediction.created_at.desc()).limit(10).all()
+    
+    response = []
+    from datetime import timedelta
+    for p in preds:
+        response.append({
+            "timestamp": p.created_at,
+            "predictedVisitorCount": int(p.confidence * 1000), # Mock extrapolation for MVP
+            "predictedPeakTime": p.created_at + timedelta(minutes=p.horizon),
+            "confidenceScore": p.confidence,
+            "riskLevel": p.predicted_risk,
+            "recommendedActions": [p.reason] if p.reason else []
+        })
+        
+    return response
+
+@router.get("/{event_id}/predictions/current", response_model=None)
+def get_current_prediction(
+    event_id: str,
+    db: Session = Depends(dependencies.get_db),
+    current_user: User = Depends(dependencies.get_current_user)
+):
+    """
+    Returns the most recent AI prediction for the event.
+    """
+    preds = get_event_predictions(event_id, db, current_user)
+    if preds:
+        return preds[0]
+        
+    from datetime import datetime, timezone, timedelta
+    return {
+        "timestamp": datetime.now(timezone.utc),
+        "predictedVisitorCount": 0,
+        "predictedPeakTime": datetime.now(timezone.utc) + timedelta(minutes=30),
+        "confidenceScore": 0.0,
+        "riskLevel": "LOW",
+        "recommendedActions": []
+    }

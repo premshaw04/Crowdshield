@@ -9,6 +9,7 @@ class AuditLog(Base):
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    event_id = Column(String, ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True)
     action = Column(String, nullable=False, index=True) # e.g., "SIMULATED_GATE_OPEN"
     target_id = Column(String, nullable=True, index=True) # e.g., gate_id
     details = Column(JSON, nullable=True)

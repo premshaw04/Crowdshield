@@ -1,7 +1,6 @@
 import sys
 import os
 
-# Add the root directory to sys.path so we can import 'app'
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.core.database import Base, engine
@@ -19,10 +18,12 @@ from app.models.audit_log import AuditLog
 from app.models.prediction import Prediction
 from app.models.crowd_metric import CrowdMetric
 
-def create_tables():
+def reset_tables():
+    print("Dropping all database tables...")
+    Base.metadata.drop_all(bind=engine)
     print("Creating all database tables...")
     Base.metadata.create_all(bind=engine)
     print("Tables created successfully!")
 
 if __name__ == "__main__":
-    create_tables()
+    reset_tables()

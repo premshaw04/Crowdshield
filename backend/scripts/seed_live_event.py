@@ -89,6 +89,36 @@ def seed_live_test():
         )
         db.add(video)
 
+        # 5. Create Audit Log
+        from app.models.audit_log import AuditLog
+        audit1 = AuditLog(
+            user_id=user.id,
+            event_id=event.id,
+            action="EVENT_CREATED",
+            details={"result": "SUCCESS"}
+        )
+        audit2 = AuditLog(
+            user_id=user.id,
+            event_id=event.id,
+            action="ZONE_ADDED",
+            target_id=zone.id,
+            details={"result": "SUCCESS"}
+        )
+        db.add_all([audit1, audit2])
+
+        # 6. Create Prediction
+        from app.models.prediction import Prediction
+        pred = Prediction(
+            event_id=event.id,
+            zone_id=zone.id,
+            predicted_risk="LOW",
+            horizon=30.0,
+            confidence=0.95,
+            reason="Current trends stable.",
+            model_version="v1.0"
+        )
+        db.add(pred)
+
         db.commit()
         print(f"Successfully seeded event 'Epic Live Concert' (ID: {event.id}). You can now start it from the dashboard.")
 
