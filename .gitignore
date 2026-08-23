@@ -10,3 +10,5 @@ __pycache__/
 .DS_Store
 backend/alembic.ini
 backend/crowdshield.db
+
+uploads/
