@@ -51,9 +51,9 @@ export default function AIPredictionsPage() {
 
   // 4. AI Recommendations
   const aiRecommendations: RecommendationItem[] = [
-    { id: 1, title: 'Open Gate 5', desc: 'Reduce density in Food Court', impact: 'High Impact', actionLabel: 'Approve' },
-    { id: 2, title: 'Close Gate 2', desc: 'Prevent further crowd inflow', impact: 'Medium Impact', actionLabel: 'Approve' },
-    { id: 3, title: 'Deploy 15 Guards', desc: 'At Food Court & Gate 3', impact: 'High Impact', actionLabel: 'Approve' },
+    { id: 1, title: 'Open Gate 5', desc: 'Reduce density in Food Court', impact: 'High Impact', actionLabel: 'Approve', onAction: () => { import('sonner').then(m => m.toast.info('This is a global overview. Please navigate to a specific Active Event to send real alerts.')); } },
+    { id: 2, title: 'Close Gate 2', desc: 'Prevent further crowd inflow', impact: 'Medium Impact', actionLabel: 'Approve', onAction: () => { import('sonner').then(m => m.toast.info('This is a global overview. Please navigate to a specific Active Event to send real alerts.')); } },
+    { id: 3, title: 'Deploy 15 Guards', desc: 'At Food Court & Gate 3', impact: 'High Impact', actionLabel: 'Approve', onAction: () => { import('sonner').then(m => m.toast.info('This is a global overview. Please navigate to a specific Active Event to send real alerts.')); } },
   ];
 
   // 5. Prediction History

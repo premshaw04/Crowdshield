@@ -16,6 +16,7 @@ class AlertResponse(AlertBase):
     id: str
     zone_id: Optional[str]
     created_at: datetime
+    location: Optional[str] = None
 
     class Config:
         orm_mode = True

@@ -38,4 +38,31 @@ def get_alerts(
             query = query.filter((Alert.zone_id.notin_(demo_zones)) | (Alert.zone_id == None))
             
     alerts = query.order_by(Alert.created_at.desc()).limit(limit).all()
-    return alerts
+    
+    # We need to attach location to each alert for the client
+    response = []
+    for a in alerts:
+        location_name = "Unknown Location"
+        if a.zone_id:
+            zone = db.query(Zone).filter(Zone.id == a.zone_id).first()
+            if zone:
+                venue = db.query(Venue).filter(Venue.id == zone.venue_id).first()
+                if venue:
+                    location_name = f"{venue.name} - {zone.name}"
+        
+        # We need to map it to AlertResponse and add location dynamically.
+        # Since response_model=List[AlertResponse], we need to ensure AlertResponse has 'location' or just return a dict.
+        
+        alert_dict = {
+            "id": a.id,
+            "zone_id": a.zone_id,
+            "title": a.title,
+            "description": a.description,
+            "type": a.type,
+            "category": a.category,
+            "created_at": a.created_at,
+            "location": location_name
+        }
+        response.append(alert_dict)
+        
+    return response

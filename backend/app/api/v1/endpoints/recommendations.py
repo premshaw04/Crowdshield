@@ -43,6 +43,16 @@ async def approve_recommendation(
     db.commit()
     db.refresh(new_alert)
 
+    # Fetch Zone and Venue to include location in the broadcast
+    from app.models.zone import Zone
+    from app.models.venue import Venue
+    zone = db.query(Zone).filter(Zone.id == rec.zone_id).first()
+    venue = db.query(Venue).filter(Venue.id == zone.venue_id).first() if zone else None
+    
+    location_name = venue.name if venue else "Unknown Location"
+    if zone:
+        location_name = f"{venue.name} - {zone.name}" if venue else zone.name
+
     # Broadcast alert to all clients in the affected zone
     from app.websockets.manager import manager
     
@@ -54,7 +64,8 @@ async def approve_recommendation(
             "description": new_alert.description,
             "time": new_alert.created_at.strftime("%I:%M %p"),
             "type": new_alert.type.value, 
-            "category": new_alert.category.value
+            "category": new_alert.category.value,
+            "location": location_name
         }
     }
     
