@@ -290,14 +290,6 @@ CrowdShield aims to bridge the gap between **crowd intelligence and public safet
 
 ---
 
-## 📄 License
-
-No license is currently specified in the repository.
-
-If you intend to make CrowdShield open source, consider adding an appropriate license such as MIT, Apache-2.0, or another license that matches your project's goals.
-
----
-
 <p align="center">
   Built with ❤️ for safer and smarter crowds.
 </p>
